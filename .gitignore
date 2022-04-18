@@ -1,0 +1,10 @@
+.idea
+node_modules
+/logs/
+.env
+Results
+allure-report
+allure-results
+debug.log
+jsconfig.json
+testUsers.json
