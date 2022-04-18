@@ -1,4 +1,4 @@
-const Page = require('./page');
+const Page = require('./page')
 
 /**
  * sub page containing specific selectors and methods for a specific page
@@ -8,15 +8,15 @@ class LoginPage extends Page {
    * define selectors using getter methods
    */
   get inputUsername() {
-    return $('[data-qa="login_email"]');
+    return $('[data-qa="login_email"]')
   }
 
   get inputPassword() {
-    return $('[data-qa="login_password"]');
+    return $('[data-qa="login_password"]')
   }
 
   get signinButton() {
-    return $('[data-qa="signin_button"]');
+    return $('[data-qa="signin_button"]')
   }
 
   /**
@@ -24,9 +24,9 @@ class LoginPage extends Page {
    * e.g. to login using username and password
    */
   async login(username, password) {
-    await this.inputUsername.setValue(username);
-    await this.inputPassword.setValue(password);
-    await this.signinButton.click();
+    await this.inputUsername.setValue(username)
+    await this.inputPassword.setValue(password)
+    await this.signinButton.click()
   }
 
   /**
@@ -34,4 +34,4 @@ class LoginPage extends Page {
    */
 }
 
-module.exports = new LoginPage();
+module.exports = new LoginPage()

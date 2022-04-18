@@ -1,3 +1,12 @@
+require('dotenv').config()
+const allure = require('allure-commandline')
+const runner = () => {
+  if (`${process.env.IS_LOCAL}` === 'true') {
+    return 'chromedriver'
+  }
+  return 'docker'
+}
+
 exports.config = {
   //
   //
@@ -53,7 +62,7 @@ exports.config = {
       // maxInstances can get overwritten per capability. So if you have an in-house Selenium
       // grid with only 5 firefox instances available you can make sure that not more than
       // 5 instances get started at a time.
-      maxInstances: 1,
+      maxInstances: 2,
       //
       browserName: 'chrome',
       acceptInsecureCerts: true,
@@ -94,7 +103,7 @@ exports.config = {
   // with `/`, the base url gets prepended, not including the path portion of your baseUrl.
   // If your `url` parameter starts without a scheme or `/` (like `some/path`), the base url
   // gets prepended directly.
-  baseUrl: 'http://localhost',
+  baseUrl: process.env.BASE_URL,
   //
   // Default timeout for all waitFor* commands.
   waitforTimeout: 10000,
@@ -111,9 +120,10 @@ exports.config = {
   // your test setup with almost no effort. Unlike plugins, they don't add new
   // commands. Instead, they hook themselves up into the test process.
   //services: ['chromedriver'], //chromedriver
+  services: [runner()],
   hostname: 'selenium', // tests running inside the container should connect to the same network
   port: 4444,
-  path: "/wd/hub",
+  path: '/wd/hub',
 
   // Framework you want to run your specs with.
   // The following are supported: Mocha, Jasmine, and Cucumber
@@ -124,7 +134,7 @@ exports.config = {
   framework: 'mocha',
   //
   // The number of times to retry the entire specfile when it fails as a whole
-  // specFileRetries: 1,
+  //specFileRetries: 1,
   //
   // Delay in seconds between the spec file retry attempts
   // specFileRetriesDelay: 0,
@@ -238,10 +248,8 @@ exports.config = {
    */
   // afterHook: function (test, context, { error, result, duration, passed, retries }) {
   // },
-   afterTest(test, context, { error }) {
-    
-       browser.takeScreenshot()
-    
+  afterTest(test, context, { error }) {
+    if (error) browser.takeScreenshot()
   },
   /**
    * Function to be executed after a test (in Mocha/Jasmine only)
@@ -296,8 +304,24 @@ exports.config = {
    * @param {Array.<Object>} capabilities list of capabilities details
    * @param {<Object>} results object containing test results
    */
-  // onComplete: function(exitCode, config, capabilities, results) {
-  // },
+  onComplete: function (exitCode, config, capabilities, results) {
+    const reportError = new Error('Could not generate Allure report')
+    const generation = allure(['generate', 'allure-results', '--clean'])
+    return new Promise((resolve, reject) => {
+      const generationTimeout = setTimeout(() => reject(reportError), 5000)
+
+      generation.on('exit', function (exitCode) {
+        clearTimeout(generationTimeout)
+
+        if (exitCode !== 0) {
+          return reject(reportError)
+        }
+
+        console.log('Allure report successfully generated')
+        resolve()
+      })
+    })
+  },
   /**
    * Gets executed when a refresh happens.
    * @param {String} oldSessionId session ID of the old session

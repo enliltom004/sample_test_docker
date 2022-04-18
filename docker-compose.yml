@@ -12,6 +12,8 @@ services:
   e2e:
     image: e2e-test
     build: .
+    environment: 
+      - PASSWORD=${PASSWORD}
     depends_on:
       - selenium
     links:
