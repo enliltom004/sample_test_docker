@@ -3,7 +3,7 @@ const LoginPage = require('../../pageobjects/login.page')
 const ChannelPage = require('../../pageobjects/channel.page')
 const testData = require('../../data/testData')
 
-describe('My Login application', () => {
+describe('Test Slack ', () => {
   before(async () => {
     await LaunchPage.open()
     await LaunchPage.enterWorkspace(testData.workspce)
@@ -13,14 +13,14 @@ describe('My Login application', () => {
       testData.loginCreds.password
     )
   })
-  it('should login with valid credentials', async () => {
+  it('Validate if Messages Can be Saved ', async () => {
     await ChannelPage.enterText(testData.team, testData.textMsg)
     await ChannelPage.saveMessage()
     await ChannelPage.clickSavedTab()
     await ChannelPage.validateMsg(testData.textMsg)
   })
 
-  it('Check Saved items ', async () => {
+  it('Validate Search Functionality', async () => {
     await ChannelPage.search(testData.searchText)
     await ChannelPage.validateResults(testData.textMsg)
   })

@@ -1,10 +1,11 @@
 require('dotenv').config()
+const { exec } = require("child_process");
 const allure = require('allure-commandline')
 const runner = () => {
   if (`${process.env.IS_LOCAL}` === 'true') {
     return 'chromedriver'
   }
-  return 'docker'
+  return ' '
 }
 
 exports.config = {
@@ -62,7 +63,7 @@ exports.config = {
       // maxInstances can get overwritten per capability. So if you have an in-house Selenium
       // grid with only 5 firefox instances available you can make sure that not more than
       // 5 instances get started at a time.
-      maxInstances: 2,
+      maxInstances: 1,
       //
       browserName: 'chrome',
       acceptInsecureCerts: true,
@@ -304,23 +305,18 @@ exports.config = {
    * @param {Array.<Object>} capabilities list of capabilities details
    * @param {<Object>} results object containing test results
    */
-  onComplete: function (exitCode, config, capabilities, results) {
-    const reportError = new Error('Could not generate Allure report')
-    const generation = allure(['generate', 'allure-results', '--clean'])
-    return new Promise((resolve, reject) => {
-      const generationTimeout = setTimeout(() => reject(reportError), 5000)
-
-      generation.on('exit', function (exitCode) {
-        clearTimeout(generationTimeout)
-
-        if (exitCode !== 0) {
-          return reject(reportError)
-        }
-
-        console.log('Allure report successfully generated')
-        resolve()
-      })
-    })
+  onComplete() {
+    exec("npx  allure generate allure-results  ", (error, stdout, stderr) => {
+      if (error) {
+          console.log(`error: ${error.message}`);
+          return;
+      }
+      if (stderr) {
+          console.log(`stderr: ${stderr}`);
+          return;
+      }
+      console.log(`stdout: ${stdout}`);
+  });
   },
   /**
    * Gets executed when a refresh happens.

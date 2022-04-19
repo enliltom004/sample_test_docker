@@ -8,6 +8,11 @@ services:
       - "4444"
     networks:
       - selenium
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4444"]
+      interval: 30s
+      timeout: 10s
+      retries: 5 
 
   e2e:
     image: e2e-test
@@ -15,14 +20,23 @@ services:
     environment: 
       - PASSWORD=${PASSWORD}
     depends_on:
-      - selenium
+      selenium:
+        condition: service_healthy  
     links:
-      - selenium
+      - selenium  
     networks:
       - selenium
     volumes:
-      - "./allure-results:/app/allure-results"
-
+      - ./allure-results:/app/allure-results
+  allure:
+    image: "frankescobar/allure-docker-service"
+    ports:
+      - "5050:5050"
+    depends_on:
+      - selenium
+    volumes:
+      - ./allure-results:/app/allure-results
+      - ./allure-report:/app/default-reports
 networks:
   selenium:
     name: selenium
